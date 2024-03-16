@@ -8,12 +8,10 @@
 namespace soc{
     class SocWindow
     {
-
     public:
         SocWindow(int w,int h,std::string name);
         ~SocWindow();
 
-        
         SocWindow(const SocWindow &) = delete;
         SocWindow &operation(const SocWindow &) = delete;
 
@@ -24,11 +22,6 @@ namespace soc{
         const int width;
         const int height;
         std::string windowName;
-        GLFWwindow *window;
-
-   
-    };
-    
-  
-    
+        GLFWwindow *window;   
+    };        
 }
