@@ -1,6 +1,7 @@
 #pragma once
 
 #include "soc_window.hpp"
+#include "soc_pipeline.hpp"
 
 namespace soc{
 
@@ -13,6 +14,6 @@ namespace soc{
 
         private:
         SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};
-
+        SocPipeline pipeline{"shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv"};
     };
 }
