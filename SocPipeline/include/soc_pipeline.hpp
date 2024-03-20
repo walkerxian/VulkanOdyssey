@@ -12,9 +12,10 @@ namespace soc{
         ~SocPipeline();
 
     private:
-        static std::vector<char> readFile(const std::string& filename);
-        void createGraphicPipeline(const std::string& vertFilepath,const std::string& fragFilepath);
-        
+        static std::vector<char> readFile(const std::string& filename);      
+        void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath);
+
+    
     };
     
 }

@@ -17,13 +17,15 @@ namespace soc{
 
         bool shouldClose(){return glfwWindowShouldClose(window);}
         
-        void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+      //  void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
         
     private:
         /* data */
         void initWindow();
+        
         const int width;
         const int height;
+
         std::string windowName;
         GLFWwindow *window;   
     };        

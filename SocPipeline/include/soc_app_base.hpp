@@ -14,6 +14,6 @@ namespace soc{
 
         private:
         SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};
-        SocPipeline pipeline{"shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv"};
+        SocPipeline pipeline{"shaders\\simple_shader.vert.spv", "shaders\\simple_shader.frag.spv"};
     };
 }
