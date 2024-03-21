@@ -14,6 +14,13 @@ namespace soc{
 
         private:
         SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};
-        SocPipeline pipeline{"shaders\\simple_shader.vert.spv", "shaders\\simple_shader.frag.spv"};
+        
+        SocDevice socDevice{socWindow};
+        VkPipelineLayout pipelineLayout;            
+        SocPipeline pipeline{
+            socDevice,
+            "shaders\\simple_shader.vert.spv", 
+            "shaders\\simple_shader.frag.spv",
+            SocPipeline::defaultPipelineConfigInfo(WIDTH,HEIGHT)};
     };
 }

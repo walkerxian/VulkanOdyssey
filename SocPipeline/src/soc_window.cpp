@@ -2,7 +2,7 @@
 #include "soc_window.hpp"
 
 //std
-//#include <stdexcept>
+#include <stdexcept>
 
 namespace soc
 {
@@ -26,12 +26,12 @@ namespace soc
 
     }
 
-    // void SocWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {
+    void SocWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {
     
-    //     if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {       
-    //         throw std::runtime_error("failed to create window surface!");
-    //     }
-    // }
+        if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {       
+            throw std::runtime_error("failed to create window surface!");
+        }
+    }
 
 
 } // namespace soc

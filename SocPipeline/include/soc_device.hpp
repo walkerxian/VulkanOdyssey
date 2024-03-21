@@ -1,131 +1,131 @@
-// #pragma once
+#pragma once
 
-// #include "soc_window.hpp"
+#include "soc_window.hpp"
 
-// // std lib headers
-// #include <string>
-// #include <vector>
+// std lib headers
+#include <string>
+#include <vector>
 
-// namespace soc {
+namespace soc {
 
-// struct SwapChainSupportDetails {
+struct SwapChainSupportDetails {
 
-//   VkSurfaceCapabilitiesKHR capabilities;
-//   std::vector<VkSurfaceFormatKHR> formats;
-//   std::vector<VkPresentModeKHR> presentModes;
+  VkSurfaceCapabilitiesKHR capabilities;
+  std::vector<VkSurfaceFormatKHR> formats;
+  std::vector<VkPresentModeKHR> presentModes;
 
-// };
+};
 
-// struct QueueFamilyIndices {
+struct QueueFamilyIndices {
 
-//   uint32_t graphicsFamily;
-//   uint32_t presentFamily;
+  uint32_t graphicsFamily;
+  uint32_t presentFamily;
   
-//   bool graphicsFamilyHasValue = false;
+  bool graphicsFamilyHasValue = false;
   
-//   bool presentFamilyHasValue = false;
+  bool presentFamilyHasValue = false;
 
-//   bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
+  bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
 
-// };
+};
 
-// class SocDevice {
-//  public:
-// #ifdef NDEBUG
-//   const bool enableValidationLayers = false;
-// #else
-//   const bool enableValidationLayers = true;
-// #endif
+class SocDevice {
+ public:
+#ifdef NDEBUG
+  const bool enableValidationLayers = false;
+#else
+  const bool enableValidationLayers = true;
+#endif
 
-//   SocDevice(SocWindow &window);
-//   ~SocDevice();
+  SocDevice(SocWindow &window);
+  ~SocDevice();
 
-//   // Not copyable or movable
-//   SocDevice(const SocDevice &) = delete;
-//   void operator=(const SocDevice &) = delete;
-//   SocDevice(SocDevice &&) = delete;
-//   SocDevice &operator=(SocDevice &&) = delete;
+  // Not copyable or movable
+  SocDevice(const SocDevice &) = delete;
+  void operator=(const SocDevice &) = delete;
+  SocDevice(SocDevice &&) = delete;
+  SocDevice &operator=(SocDevice &&) = delete;
 
-//   VkCommandPool getCommandPool() { return commandPool; }
-//   VkDevice device() { return device_; }
-//   VkSurfaceKHR surface() { return surface_; }
+  VkCommandPool getCommandPool() { return commandPool; }
+  VkDevice device() { return device_; }
+  VkSurfaceKHR surface() { return surface_; }
 
-//   VkQueue graphicsQueue() { return graphicsQueue_; }
-//   VkQueue presentQueue() { return presentQueue_; }
+  VkQueue graphicsQueue() { return graphicsQueue_; }
+  VkQueue presentQueue() { return presentQueue_; }
 
-//   SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
+  SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
 
-//   uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+  uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-//   QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(physicalDevice); }
+  QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(physicalDevice); }
 
-//   VkFormat findSupportedFormat(    
-//       const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+  VkFormat findSupportedFormat(    
+      const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
-//   // Buffer Helper Functions
-//   void createBuffer(
-//       VkDeviceSize size,
-//       VkBufferUsageFlags usage,
-//       VkMemoryPropertyFlags properties,
-//       VkBuffer &buffer,
-//       VkDeviceMemory &bufferMemory);
+  // Buffer Helper Functions
+  void createBuffer(
+      VkDeviceSize size,
+      VkBufferUsageFlags usage,
+      VkMemoryPropertyFlags properties,
+      VkBuffer &buffer,
+      VkDeviceMemory &bufferMemory);
 
-//   VkCommandBuffer beginSingleTimeCommands();
+  VkCommandBuffer beginSingleTimeCommands();
 
-//   void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+  void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
-//   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+  void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
-//   void copyBufferToImage(
-//       VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
+  void copyBufferToImage(
+      VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
 
-//   void createImageWithInfo(
+  void createImageWithInfo(
 
-//       const VkImageCreateInfo &imageInfo,
-//       VkMemoryPropertyFlags properties,
-//       VkImage &image,
-//       VkDeviceMemory &imageMemory);
+      const VkImageCreateInfo &imageInfo,
+      VkMemoryPropertyFlags properties,
+      VkImage &image,
+      VkDeviceMemory &imageMemory);
 
-//   VkPhysicalDeviceProperties properties;
+  VkPhysicalDeviceProperties properties;
 
-//  private:
-//   void createInstance();
-//   void setupDebugMessenger();
-//   void createSurface();
-//   void pickPhysicalDevice();
-//   void createLogicalDevice();
-//   void createCommandPool();
+ private:
+  void createInstance();
+  void setupDebugMessenger();
+  void createSurface();
+  void pickPhysicalDevice();
+  void createLogicalDevice();
+  void createCommandPool();
 
-//   // helper functions
-//   bool isDeviceSuitable(VkPhysicalDevice device);
+  // helper functions
+  bool isDeviceSuitable(VkPhysicalDevice device);
 
-//   std::vector<const char *> getRequiredExtensions();
+  std::vector<const char *> getRequiredExtensions();
 
-//   bool checkValidationLayerSupport();
+  bool checkValidationLayerSupport();
 
-//   QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+  QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
-//   void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+  void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 
-//   void hasGflwRequiredInstanceExtensions();
+  void hasGflwRequiredInstanceExtensions();
 
-//   bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+  bool checkDeviceExtensionSupport(VkPhysicalDevice device);
   
-//   SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+  SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
-//   VkInstance instance;
-//   VkDebugUtilsMessengerEXT debugMessenger;
-//   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-//   SocWindow &window;
-//   VkCommandPool commandPool;
+  VkInstance instance;
+  VkDebugUtilsMessengerEXT debugMessenger;
+  VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+  SocWindow &window;
+  VkCommandPool commandPool;
 
-//   VkDevice device_;
-//   VkSurfaceKHR surface_;
-//   VkQueue graphicsQueue_;
-//   VkQueue presentQueue_;
+  VkDevice device_;
+  VkSurfaceKHR surface_;
+  VkQueue graphicsQueue_;
+  VkQueue presentQueue_;
 
-//   const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
-//   const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-// };
+  const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+  const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+};
 
-// }  // namespace lve
+}  // namespace lve

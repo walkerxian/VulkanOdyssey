@@ -17,7 +17,7 @@ namespace soc{
 
         bool shouldClose(){return glfwWindowShouldClose(window);}
         
-      //  void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+        void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
         
     private:
         /* data */
