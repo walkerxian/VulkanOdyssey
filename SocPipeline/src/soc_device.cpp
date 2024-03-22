@@ -47,7 +47,7 @@ void DestroyDebugUtilsMessengerEXT(
   }
 }
 
-// class member functions
+// class member functions：SocDevice是一个集合实质代表了App通过SocDevice操作GPU显卡
 SocDevice::SocDevice(SocWindow &window) : window{window} {
   createInstance();
   setupDebugMessenger();
@@ -102,6 +102,7 @@ void SocDevice::createInstance() {
     createInfo.pNext = nullptr;
   }
 
+  //创建实例Instance
   if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
     throw std::runtime_error("failed to create instance!");
   }
@@ -264,7 +265,14 @@ bool SocDevice::checkValidationLayerSupport() {
 std::vector<const char *> SocDevice::getRequiredExtensions() {
   uint32_t glfwExtensionCount = 0;
   const char **glfwExtensions;
+  
+ //0: VK_KHR_surface  VK_KHR_win32_surface
   glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+
+// for (uint32_t i = 0; i < glfwExtensionCount; i++) {
+//     std::cout << "Extension " << i << ": " << glfwExtensions[i] << std::endl;
+// }
 
   std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
@@ -275,23 +283,38 @@ std::vector<const char *> SocDevice::getRequiredExtensions() {
   return extensions;
 }
 
+//窗口系统要求开启的实例
 void SocDevice::hasGflwRequiredInstanceExtensions() {
+
+  //获取当前设备支持的实例扩展
   uint32_t extensionCount = 0;
   vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
   std::vector<VkExtensionProperties> extensions(extensionCount);
   vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
+  //检测当前设备支持哪些扩展，看看第三方需要的扩展当前设备是否支持
+
   std::cout << "available extensions:" << std::endl;
+
   std::unordered_set<std::string> available;
+
   for (const auto &extension : extensions) {
+
     std::cout << "\t" << extension.extensionName << std::endl;
+
     available.insert(extension.extensionName);
+
   }
 
   std::cout << "required extensions:" << std::endl;
+  
   auto requiredExtensions = getRequiredExtensions();
+  
   for (const auto &required : requiredExtensions) {
+    
     std::cout << "\t" << required << std::endl;
+    
+    //没有需要的扩展
     if (available.find(required) == available.end()) {
       throw std::runtime_error("Missing required glfw extension");
     }
@@ -404,12 +427,14 @@ uint32_t SocDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags pr
   throw std::runtime_error("failed to find suitable memory type!");
 }
 
+
 void SocDevice::createBuffer(
     VkDeviceSize size,
     VkBufferUsageFlags usage,
     VkMemoryPropertyFlags properties,
     VkBuffer &buffer,
     VkDeviceMemory &bufferMemory) {
+      
   VkBufferCreateInfo bufferInfo{};
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   bufferInfo.size = size;
@@ -436,6 +461,7 @@ void SocDevice::createBuffer(
 }
 
 VkCommandBuffer SocDevice::beginSingleTimeCommands() {
+
   VkCommandBufferAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;

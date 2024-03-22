@@ -8,6 +8,11 @@
 namespace soc{
 
     struct PipelineConfigInfo {
+
+        PipelineConfigInfo() = default;
+        PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+        PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+
         VkViewport viewport;
         VkRect2D scissor;
         
@@ -40,8 +45,10 @@ namespace soc{
         SocPipeline(const SocPipeline&) = delete;
         void operator=(const SocPipeline&) = delete;
 
-        static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+        void bind(VkCommandBuffer commandBuffer);
 
+        static void  defaultPipelineConfigInfo(
+            PipelineConfigInfo& configInfo, uint32_t width, uint32_t height);
 
     private:
         static std::vector<char> readFile(const std::string& filename);      
@@ -50,6 +57,7 @@ namespace soc{
             const std::string& vertFilepath, 
             const std::string& fragFilepath,
             const PipelineConfigInfo& configInfo);    
+
         void createShaderModule(const std::vector<char>& code,VkShaderModule* shaderModule);
 
         SocDevice& socDevice;

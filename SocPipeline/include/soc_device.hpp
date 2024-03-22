@@ -68,7 +68,7 @@ class SocDevice {
       VkBufferUsageFlags usage,
       VkMemoryPropertyFlags properties,
       VkBuffer &buffer,
-      VkDeviceMemory &bufferMemory);
+      VkDeviceMemory &bufferMemory);//为什么需要添加bufferMermory?
 
   VkCommandBuffer beginSingleTimeCommands();
 

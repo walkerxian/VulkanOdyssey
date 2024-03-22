@@ -8,10 +8,6 @@
 //#include <vector>
 //#include <filesystem>
 
-
-
-
-
 namespace soc{
 
     SocPipeline::SocPipeline(
@@ -126,8 +122,12 @@ void SocPipeline::createShaderModule(const std::vector<char>& code,VkShaderModul
     }
 }
 
-PipelineConfigInfo SocPipeline::defaultPipelineConfigInfo(uint32_t width, uint32_t height) {
-  PipelineConfigInfo configInfo{};
+//void SocPipeline::Bin
+
+void SocPipeline::defaultPipelineConfigInfo(
+  PipelineConfigInfo& configInfo,uint32_t width, uint32_t height) {
+  
+  //PipelineConfigInfo configInfo{};
 
   configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
   configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -201,8 +201,12 @@ PipelineConfigInfo SocPipeline::defaultPipelineConfigInfo(uint32_t width, uint32
   configInfo.depthStencilInfo.stencilTestEnable = VK_FALSE;
   configInfo.depthStencilInfo.front = {};  // Optional
   configInfo.depthStencilInfo.back = {};   // Optional
+}
 
-  return configInfo;
+void SocPipeline::bind(VkCommandBuffer commandBuffer){
+
+  vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
 }
 
 std::vector<char> SocPipeline::readFile(const std::string& filename) {
