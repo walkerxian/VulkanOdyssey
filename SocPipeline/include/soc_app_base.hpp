@@ -2,6 +2,11 @@
 
 #include "soc_window.hpp"
 #include "soc_pipeline.hpp"
+#include "soc_swap_chain.hpp"
+
+//std
+#include <memory>
+
 
 namespace soc{
 
@@ -10,17 +15,35 @@ namespace soc{
         static constexpr int WIDTH = 800;
         static constexpr int HEIGHT = 600;
 
+        SocAppBase();
+        ~SocAppBase();
+
+
+        SocAppBase(const SocAppBase &) = delete;
+        SocAppBase &operator = (const SocAppBase &) = delete;
+        
         void run();
 
         private:
-        SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};
-        
+        void createPipelineLayout();
+        void createPipeline();
+        void createCommandBuffers();
+        void drawFrame();
+
+        SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};        
         SocDevice socDevice{socWindow};
-        VkPipelineLayout pipelineLayout;            
-        SocPipeline pipeline{
-            socDevice,
-            "shaders\\simple_shader.vert.spv", 
-            "shaders\\simple_shader.frag.spv",
-            SocPipeline::defaultPipelineConfigInfo(WIDTH,HEIGHT)};
+        SocSwapChain socSwapChain{socDevice,socWindow.getExtent()};
+
+        std::unique_ptr<SocPipeline> socPipeline;        
+        VkPipelineLayout pipelineLayout;         
+        std::vector<VkCommandBuffer> commandBuffers;
+
+
+
+        // SocPipeline pipeline{
+        //     socDevice,
+        //     "shaders\\simple_shader.vert.spv", 
+        //     "shaders\\simple_shader.frag.spv",
+        //     SocPipeline::defaultPipelineConfigInfo(WIDTH,HEIGHT)};
     };
 }
