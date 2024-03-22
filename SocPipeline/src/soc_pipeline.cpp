@@ -133,10 +133,11 @@ void SocPipeline::defaultPipelineConfigInfo(
   configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
   configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
 
+  //视口变换
   configInfo.viewport.x = 0.0f;
   configInfo.viewport.y = 0.0f;
-  configInfo.viewport.width = static_cast<float>(width);
-  configInfo.viewport.height = static_cast<float>(height);
+  configInfo.viewport.width = static_cast<float>(width)*0.5f;
+  configInfo.viewport.height = static_cast<float>(height) *0.5f;
   configInfo.viewport.minDepth = 0.0f;
   configInfo.viewport.maxDepth = 1.0f;
 
