@@ -3,9 +3,12 @@
 #include "soc_window.hpp"
 #include "soc_pipeline.hpp"
 #include "soc_swap_chain.hpp"
+#include "soc_device.hpp"
+#include "soc_model.hpp"
 
 //std
 #include <memory>
+#include <vector>
 
 
 namespace soc{
@@ -25,6 +28,7 @@ namespace soc{
         void run();
 
         private:
+        void loadModels();
         void createPipelineLayout();
         void createPipeline();
         void createCommandBuffers();
@@ -32,11 +36,13 @@ namespace soc{
 
         SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};        
         SocDevice socDevice{socWindow};
+        
         SocSwapChain socSwapChain{socDevice,socWindow.getExtent()};
 
         std::unique_ptr<SocPipeline> socPipeline;        
         VkPipelineLayout pipelineLayout;         
         std::vector<VkCommandBuffer> commandBuffers;
+        std::unique_ptr<SocModel> socModel;
 
 
 
