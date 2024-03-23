@@ -7,7 +7,6 @@
 namespace soc{
 
     SocAppBase::SocAppBase(){
-        loadModels();
         createPipelineLayout();
         createPipeline();
         createCommandBuffers();
@@ -31,16 +30,6 @@ namespace soc{
         vkDeviceWaitIdle(socDevice.device());//why?
         
     }
-
-void SocAppBase::loadModels() {
-  std::vector<SocModel::Vertex> vertices{
-      
-      {{0.0f, -0.5f}},
-      {{0.5f, 0.5f}},
-      {{-0.5f, 0.5f}}
-      };
-  socModel = std::make_unique<SocModel>(socDevice, vertices);
-}
 
     void SocAppBase::createPipelineLayout(){
               
@@ -119,8 +108,6 @@ void SocAppBase::loadModels() {
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             socPipeline->bind(commandBuffers[i]);
-            socModel->bind(commandBuffers[i]);
-            socModel->draw(commandBuffers[i]);
 
             vkCmdDraw(commandBuffers[i],3,1,0,0);
             vkCmdEndRenderPass(commandBuffers[i]);
