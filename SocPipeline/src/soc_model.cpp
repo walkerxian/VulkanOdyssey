@@ -6,20 +6,20 @@
 
 namespace soc {
 
-SocModel::SocModel(SocDevice &device, const std::vector<Vertex> &vertices) : SocDevice{device} {
-    createVertexBuffers(vertices);
+SocModel::SocModel(SocDevice &device, const std::vector<Vertex> &vertices) : socDevice{device} {
+  createVertexBuffers(vertices);
 }
 
 SocModel::~SocModel() {
-  vkDestroyBuffer(SocDevice.device(), vertexBuffer, nullptr);
-  vkFreeMemory(SocDevice.device(), vertexBufferMemory, nullptr);
+  vkDestroyBuffer(socDevice.device(), vertexBuffer, nullptr);
+  vkFreeMemory(socDevice.device(), vertexBufferMemory, nullptr);
 }
 
 void SocModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
   vertexCount = static_cast<uint32_t>(vertices.size());
   assert(vertexCount >= 3 && "Vertex count must be at least 3");
   VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
-  SocDevice.createBuffer(
+  socDevice.createBuffer(
       bufferSize,
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -27,9 +27,9 @@ void SocModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
       vertexBufferMemory);
 
   void *data;
-  vkMapMemory(SocDevice.device(), vertexBufferMemory, 0, bufferSize, 0, &data);
+  vkMapMemory(socDevice.device(), vertexBufferMemory, 0, bufferSize, 0, &data);
   memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-  vkUnmapMemory(SocDevice.device(), vertexBufferMemory);
+  vkUnmapMemory(socDevice.device(), vertexBufferMemory);
 }
 
 void SocModel::draw(VkCommandBuffer commandBuffer) {

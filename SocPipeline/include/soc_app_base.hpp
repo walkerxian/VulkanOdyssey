@@ -3,6 +3,7 @@
 #include "soc_window.hpp"
 #include "soc_pipeline.hpp"
 #include "soc_swap_chain.hpp"
+#include "soc_model.hpp"
 
 //std
 #include <memory>
@@ -25,6 +26,7 @@ namespace soc{
         void run();
 
         private:
+        void loadModels();
         void createPipelineLayout();
         void createPipeline();
         void createCommandBuffers();
@@ -38,7 +40,7 @@ namespace soc{
         VkPipelineLayout pipelineLayout;         
         std::vector<VkCommandBuffer> commandBuffers;
 
-
+        std::unique_ptr<SocModel> socModel;
 
         // SocPipeline pipeline{
         //     socDevice,

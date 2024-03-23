@@ -21,7 +21,7 @@ class SocModel {
     static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
   };
 
-  SocModel(SocModel &device, const std::vector<Vertex> &vertices);
+  SocModel(SocDevice &device, const std::vector<Vertex> &vertices);
   ~SocModel();
 
   SocModel(const SocModel &) = delete;
