@@ -1,5 +1,5 @@
 #include "soc_pipeline.hpp"
-
+#include "soc_model.hpp"
 //std
 #include<cassert>
 #include <fstream>
@@ -64,13 +64,16 @@ void SocPipeline::createGraphicsPipeline(
     shaderStages[1].pNext = nullptr;
     shaderStages[1].pSpecializationInfo = nullptr;
 
+    auto bindingDescriptions = SocModel::Vertex::getBindingDescriptions();
+    auto attributeDescriptions = SocModel::Vertex::getAttributeDescriptions();
     //输入通过顶点缓冲区绑定信息
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.pVertexBindingDescriptions = nullptr;  // Optional
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
-    vertexInputInfo.pVertexAttributeDescriptions = nullptr;  // Optional
+    vertexInputInfo.vertexBindingDescriptionCount =  static_cast<uint32_t>(bindingDescriptions.size());
+    vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
+
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInputInfo.pVertexAttributeDescriptions =  attributeDescriptions.data();
 
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -80,15 +83,17 @@ void SocPipeline::createGraphicsPipeline(
     pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
     pipelineInfo.pViewportState = &configInfo.viewportInfo;
     pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
-    pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
+    pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;//多重采样
     pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
     pipelineInfo.pDynamicState = nullptr;  // Optional
     pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
 
+    //暂时未有处理
     pipelineInfo.layout = configInfo.pipelineLayout;
     pipelineInfo.renderPass = configInfo.renderPass;
     pipelineInfo.subpass = configInfo.subpass;
 
+    //优化性能
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;  // Optional
     pipelineInfo.basePipelineIndex = -1;               // Optional
 
@@ -136,11 +141,11 @@ void SocPipeline::defaultPipelineConfigInfo(
   //视口变换
   configInfo.viewport.x = 0.0f;
   configInfo.viewport.y = 0.0f;
-  configInfo.viewport.width = static_cast<float>(width)*0.5f;
-  configInfo.viewport.height = static_cast<float>(height) *0.5f;
+  configInfo.viewport.width = static_cast<float>(width);
+  configInfo.viewport.height = static_cast<float>(height);
   configInfo.viewport.minDepth = 0.0f;
   configInfo.viewport.maxDepth = 1.0f;
-
+  //裁剪
   configInfo.scissor.offset = {0, 0};
   configInfo.scissor.extent = {width, height};
 
@@ -151,6 +156,7 @@ void SocPipeline::defaultPipelineConfigInfo(
   configInfo.viewportInfo.scissorCount = 1;
   configInfo.viewportInfo.pScissors = &configInfo.scissor;
 
+  //raster
   configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
   configInfo.rasterizationInfo.depthClampEnable = VK_FALSE;
   configInfo.rasterizationInfo.rasterizerDiscardEnable = VK_FALSE;
@@ -158,11 +164,13 @@ void SocPipeline::defaultPipelineConfigInfo(
   configInfo.rasterizationInfo.lineWidth = 1.0f;
   configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
   configInfo.rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+  //深度偏差
   configInfo.rasterizationInfo.depthBiasEnable = VK_FALSE;
   configInfo.rasterizationInfo.depthBiasConstantFactor = 0.0f;  // Optional
   configInfo.rasterizationInfo.depthBiasClamp = 0.0f;           // Optional
   configInfo.rasterizationInfo.depthBiasSlopeFactor = 0.0f;     // Optional
 
+  //multisample
   configInfo.multisampleInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
   configInfo.multisampleInfo.sampleShadingEnable = VK_FALSE;
   configInfo.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -182,6 +190,7 @@ void SocPipeline::defaultPipelineConfigInfo(
   configInfo.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;  // Optional
   configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;              // Optional
 
+  //blend
   configInfo.colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
   configInfo.colorBlendInfo.logicOpEnable = VK_FALSE;
   configInfo.colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;  // Optional
