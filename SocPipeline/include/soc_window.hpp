@@ -29,8 +29,8 @@ namespace soc{
         /* data */
         void initWindow();
         
-        const int width;
-        const int height;
+        int width;
+        int height;
         bool framebufferResized = false;
 
         std::string windowName;

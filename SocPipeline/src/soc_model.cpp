@@ -57,6 +57,7 @@ std::vector<VkVertexInputAttributeDescription> SocModel::Vertex::getAttributeDes
   attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
   attributeDescriptions[0].offset = offsetof(Vertex, position);
 
+  //Color 在一个绑定中交错使用位置和颜色
   attributeDescriptions[1].binding = 0;
   attributeDescriptions[1].location = 1;
   attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;

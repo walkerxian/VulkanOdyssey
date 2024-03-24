@@ -23,7 +23,9 @@ namespace soc
         glfwWindowHint(GLFW_RESIZABLE,GLFW_FALSE);
 
         window = glfwCreateWindow(width,height,windowName.c_str(),nullptr,nullptr);
-
+        
+        glfwSetWindowUserPointer(window, this);
+        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
 
     void SocWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {
@@ -31,6 +33,14 @@ namespace soc
         if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {       
             throw std::runtime_error("failed to create window surface!");
         }
+    }
+
+    void SocWindow::framebufferResizeCallback(GLFWwindow * window,int width,int height)
+    {
+        auto  socWindow = reinterpret_cast<SocWindow *>(glfwGetWindowUserPointer(window));
+        socWindow->framebufferResized = true;
+        socWindow->width = width;
+        socWindow->height = height;
     }
 
 
