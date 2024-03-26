@@ -19,7 +19,7 @@ class SocSwapChain {
   ~SocSwapChain();
 
   SocSwapChain(const SocSwapChain &) = delete;
-  void operator=(const SocSwapChain &) = delete;
+  SocSwapChain& operator=(const SocSwapChain &) = delete;
 
   VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
   VkRenderPass getRenderPass() { return renderPass; }

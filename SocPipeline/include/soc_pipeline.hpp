@@ -11,6 +11,7 @@ namespace soc{
 
         PipelineConfigInfo() = default;
         PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+        
         PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
 
         VkViewport viewport;

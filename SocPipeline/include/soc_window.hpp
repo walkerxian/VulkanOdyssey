@@ -13,7 +13,8 @@ namespace soc{
         ~SocWindow();
 
         SocWindow(const SocWindow &) = delete;
-        SocWindow &operation(const SocWindow &) = delete;
+        SocWindow& operation(const SocWindow &) = delete;
+        
         bool shouldClose(){return glfwWindowShouldClose(window);}        
 
         VkExtent2D getExtent(){return {static_cast<uint32_t>(width),static_cast<uint32_t>(height)};}

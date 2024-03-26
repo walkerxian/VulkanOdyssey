@@ -44,7 +44,7 @@ class SocDevice {
   SocDevice(const SocDevice &) = delete;
   void operator=(const SocDevice &) = delete;
   SocDevice(SocDevice &&) = delete;
-  SocDevice &operator=(SocDevice &&) = delete;
+  SocDevice& operator=(SocDevice &&) = delete;
 
   VkCommandPool getCommandPool() { return commandPool; }
   VkDevice device() { return device_; }

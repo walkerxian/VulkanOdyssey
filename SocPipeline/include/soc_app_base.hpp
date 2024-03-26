@@ -21,7 +21,7 @@ namespace soc{
 
 
         SocAppBase(const SocAppBase &) = delete;
-        SocAppBase &operator = (const SocAppBase &) = delete;
+        SocAppBase& operator = (const SocAppBase &) = delete;
         
         void run();
 

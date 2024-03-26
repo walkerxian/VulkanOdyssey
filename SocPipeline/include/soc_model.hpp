@@ -25,7 +25,7 @@ class SocModel {
   ~SocModel();
 
   SocModel(const SocModel &) = delete;
-  SocModel &operator=(const SocModel &) = delete;
+  SocModel& operator=(const SocModel &) = delete;
 
   void bind(VkCommandBuffer commandBuffer);
   void draw(VkCommandBuffer commandBuffer);
