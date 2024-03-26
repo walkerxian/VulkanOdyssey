@@ -26,6 +26,7 @@ namespace soc{
         
     private:
 
+        //新的宽、高
         static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
         /* data */
         void initWindow();

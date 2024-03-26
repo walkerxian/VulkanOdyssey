@@ -31,10 +31,13 @@ namespace soc{
         void createPipeline();
         void createCommandBuffers();
         void drawFrame();
+        void recreateSwapChain();
+        void recordCommandBuffer(int imageIndex);
 
         SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};        
         SocDevice socDevice{socWindow};
-        SocSwapChain socSwapChain{socDevice,socWindow.getExtent()};
+        //SocSwapChain socSwapChain{socDevice,socWindow.getExtent()};
+        std::unique_ptr<SocSwapChain> socSwapChain;
 
         std::unique_ptr<SocPipeline> socPipeline;        
         VkPipelineLayout pipelineLayout;         

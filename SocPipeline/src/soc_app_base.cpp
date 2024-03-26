@@ -62,10 +62,10 @@ namespace soc{
         //获取默认的管线配置
         SocPipeline::defaultPipelineConfigInfo(
             pipelineConfig,
-            socSwapChain.width(),
-            socSwapChain.height());
+            socSwapChain->width(),
+            socSwapChain->height());
         
-        pipelineConfig.renderPass = socSwapChain.getRenderPass();
+        pipelineConfig.renderPass = socSwapChain->getRenderPass();
         pipelineConfig.pipelineLayout = pipelineLayout;
         //需要准备3份数据
         socPipeline = std::make_unique<SocPipeline>(
@@ -77,7 +77,7 @@ namespace soc{
 
     void SocAppBase::createCommandBuffers(){
         
-        commandBuffers.resize(socSwapChain.imageCount());
+        commandBuffers.resize(socSwapChain->imageCount());
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -102,11 +102,11 @@ namespace soc{
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
             //core 
-            renderPassInfo.renderPass = socSwapChain.getRenderPass();
-            renderPassInfo.framebuffer = socSwapChain.getFrameBuffer(i);
+            renderPassInfo.renderPass = socSwapChain->getRenderPass();
+            renderPassInfo.framebuffer = socSwapChain->getFrameBuffer(i);
 
             renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = socSwapChain.getSwapChainExtent();
+            renderPassInfo.renderArea.extent = socSwapChain->getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
             clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
@@ -133,12 +133,12 @@ namespace soc{
     void SocAppBase::drawFrame(){
 
         uint32_t imageIndex;
-        auto result = socSwapChain.acquireNextImage(&imageIndex);
+        auto result = socSwapChain->acquireNextImage(&imageIndex);
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
 
-        result = socSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        result = socSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
         if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }

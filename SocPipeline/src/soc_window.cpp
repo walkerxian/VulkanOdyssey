@@ -20,10 +20,10 @@ namespace soc
     void SocWindow::initWindow(){
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API,GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE,GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE,GLFW_TRUE);//可以缩放窗口大小
 
         window = glfwCreateWindow(width,height,windowName.c_str(),nullptr,nullptr);
-        
+        //允许我们将GLFW窗口对象与任意指针配对
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
