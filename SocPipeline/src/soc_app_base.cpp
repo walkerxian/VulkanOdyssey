@@ -60,12 +60,12 @@ namespace soc{
 
     void SocAppBase::createPipeline(){
         
+        assert(socSwapChain != nullptr && "Cannot create pipeline before swap chain");
+        assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+
         PipelineConfigInfo pipelineConfig{};
         //获取默认的管线配置
-        SocPipeline::defaultPipelineConfigInfo(
-            pipelineConfig,
-            socSwapChain->width(),
-            socSwapChain->height());
+        SocPipeline::defaultPipelineConfigInfo(pipelineConfig);
         
         pipelineConfig.renderPass = socSwapChain->getRenderPass();
         pipelineConfig.pipelineLayout = pipelineLayout;
@@ -93,11 +93,11 @@ namespace soc{
         if(socSwapChain == nullptr){
             
             //std::cout<<"Start  "<<std::endl;
+            //初始化的时候已经创建了命令缓冲区
             socSwapChain = std::make_unique<SocSwapChain>(socDevice,extent);
 
         }
-        else{
-           
+        else{           
           // std::cout <<"Update  " << std::endl;
             socSwapChain = std::make_unique<SocSwapChain>(socDevice,extent,std::move(socSwapChain));
             if(socSwapChain->imageCount() != commandBuffers.size())
@@ -105,15 +105,10 @@ namespace soc{
                 freeCommandBuffers();
                 createCommandBuffers();
             }
-
         }
-   
-
         createPipeline();    
-
         // std::cout<<"Create a pipeline!"<<std::endl;
         //throw std::runtime_error("Create a Pipeline");
-
     }
 
     //只负责命令缓冲区的分配，不再记录命令缓冲区
@@ -158,6 +153,17 @@ namespace soc{
             renderPassInfo.pClearValues = clearValues.data();
 
             vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(socSwapChain->getSwapChainExtent().width);
+            viewport.height = static_cast<float>(socSwapChain->getSwapChainExtent().height);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            VkRect2D scissor{{0, 0}, socSwapChain->getSwapChainExtent()};
+            vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+            vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
             socPipeline->bind(commandBuffers[imageIndex]);
             //必须绑定
@@ -205,7 +211,12 @@ namespace soc{
         if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||socWindow.wasWindowResized())//当重新调整窗口之后，会触发该事件
         {
            socWindow.resetWindowResizedFlag();
+
+           //重建交换链只重建命令缓冲区，并不记录重新记录命令缓冲区；记
+           //命令缓冲区的记录直接走正常的记录流程
+
            recreateSwapChain();
+
            return;
         }
         else if (result != VK_SUCCESS) {

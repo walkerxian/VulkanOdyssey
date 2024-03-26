@@ -85,7 +85,7 @@ void SocPipeline::createGraphicsPipeline(
     pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
     pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;//多重采样
     pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
-    pipelineInfo.pDynamicState = nullptr;  // Optional
+    pipelineInfo.pDynamicState = &configInfo.dynamicStateInfo;
     pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
 
     //暂时未有处理
@@ -130,7 +130,7 @@ void SocPipeline::createShaderModule(const std::vector<char>& code,VkShaderModul
 //void SocPipeline::Bin
 
 void SocPipeline::defaultPipelineConfigInfo(
-  PipelineConfigInfo& configInfo,uint32_t width, uint32_t height) {
+  PipelineConfigInfo& configInfo) {
   
   //PipelineConfigInfo configInfo{};
 
@@ -138,23 +138,23 @@ void SocPipeline::defaultPipelineConfigInfo(
   configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
   configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
 
-  //视口变换
-  configInfo.viewport.x = 0.0f;
-  configInfo.viewport.y = 0.0f;
-  configInfo.viewport.width = static_cast<float>(width);
-  configInfo.viewport.height = static_cast<float>(height);
-  configInfo.viewport.minDepth = 0.0f;
-  configInfo.viewport.maxDepth = 1.0f;
-  //裁剪
-  configInfo.scissor.offset = {0, 0};
-  configInfo.scissor.extent = {width, height};
+  // //视口变换
+  // configInfo.viewport.x = 0.0f;
+  // configInfo.viewport.y = 0.0f;
+  // configInfo.viewport.width = static_cast<float>(width);
+  // configInfo.viewport.height = static_cast<float>(height);
+  // configInfo.viewport.minDepth = 0.0f;
+  // configInfo.viewport.maxDepth = 1.0f;
+  // //裁剪
+  // configInfo.scissor.offset = {0, 0};
+  // configInfo.scissor.extent = {width, height};
 
   // Known issue: this creates a self-referencing structure. Fixed in tutorial 05
   configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
   configInfo.viewportInfo.viewportCount = 1;
-  configInfo.viewportInfo.pViewports = &configInfo.viewport;
+  configInfo.viewportInfo.pViewports = nullptr;
   configInfo.viewportInfo.scissorCount = 1;
-  configInfo.viewportInfo.pScissors = &configInfo.scissor;
+  configInfo.viewportInfo.pScissors = nullptr;//这些都重新更改为动态传入的
 
   //raster
   configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -211,6 +211,14 @@ void SocPipeline::defaultPipelineConfigInfo(
   configInfo.depthStencilInfo.stencilTestEnable = VK_FALSE;
   configInfo.depthStencilInfo.front = {};  // Optional
   configInfo.depthStencilInfo.back = {};   // Optional
+
+  //配置动态视口和动态剪裁区域  
+  configInfo.dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
+  configInfo.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+  configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
+  configInfo.dynamicStateInfo.dynamicStateCount =
+      static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
+  configInfo.dynamicStateInfo.flags = 0;
 }
 
 void SocPipeline::bind(VkCommandBuffer commandBuffer){
