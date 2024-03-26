@@ -9,7 +9,8 @@ namespace soc{
     SocAppBase::SocAppBase(){
         loadModels();
         createPipelineLayout();
-        createPipeline();
+        //createPipeline();
+        recreateSwapChain();
         createCommandBuffers();
     }
 
@@ -75,6 +76,20 @@ namespace soc{
             pipelineConfig);
     }
 
+    void SocAppBase::recreateSwapChain()
+    {
+        auto extent = socWindow.getExtent();
+        while (extent.width == 0 || extent.height == 0)
+        {
+            extent = socWindow.getExtent();
+            glfwWaitEvents();//当窗口最小化暂停？
+        }
+
+        vkDeviceWaitIdle(socDevice.device);
+        socSwapChain = std::make_unique<SocSwapChain>(socDevice,extent);
+        createPipeline();    
+    }
+
     //只负责命令缓冲区的分配，不再记录命令缓冲区
     void SocAppBase::createCommandBuffers(){
         
@@ -135,6 +150,8 @@ namespace soc{
                 throw std::runtime_error("failed to record command buffer!");    
             }           
     }
+
+   
 
     void SocAppBase::drawFrame(){
 
