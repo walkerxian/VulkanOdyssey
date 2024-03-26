@@ -157,11 +157,27 @@ namespace soc{
 
         uint32_t imageIndex;
         auto result = socSwapChain->acquireNextImage(&imageIndex);
+        if(result == VK_ERROR_OUT_OF_DATE_KHR)
+        {
+            recreateSwapChain();
+            return;
+        }
+
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
 
+       //重新记录命令缓冲区，以至于缩放交换链之后重新绘制
+        recordCommandBuffer(imageIndex);
         result = socSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+         socWindow.wasWindowResized())//当重新调整窗口之后，会触发该事件
+        {
+           socWindow.resetWindowResizedFlag();
+           recreateSwapChain();
+           return;
+        }
+        
         if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }
