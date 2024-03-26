@@ -66,20 +66,25 @@ void SocPipeline::createGraphicsPipeline(
 
     auto bindingDescriptions = SocModel::Vertex::getBindingDescriptions();
     auto attributeDescriptions = SocModel::Vertex::getAttributeDescriptions();
-    //输入通过顶点缓冲区绑定信息
+    
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
     vertexInputInfo.vertexBindingDescriptionCount =  static_cast<uint32_t>(bindingDescriptions.size());
     vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
     vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
     vertexInputInfo.pVertexAttributeDescriptions =  attributeDescriptions.data();
 
+
+
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStages;
+    //配置顶点缓冲区设置
     pipelineInfo.pVertexInputState = &vertexInputInfo;
+
     pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
     pipelineInfo.pViewportState = &configInfo.viewportInfo;
     pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
@@ -105,6 +110,7 @@ void SocPipeline::createGraphicsPipeline(
           nullptr,
           &graphicsPipeline) != VK_SUCCESS) {
     throw std::runtime_error("failed to create graphics pipeline!");
+
   }
 
   vkDestroyShaderModule(socDevice.device(), fragShaderModule, nullptr);

@@ -15,6 +15,7 @@ SocModel::~SocModel() {
   vkFreeMemory(socDevice.device(), vertexBufferMemory, nullptr);
 }
 
+//创建并填充Vulkan顶点缓冲区，顶点数据最终被复制到GPU内存中，可以被后续的图形管线调用来绘制图元。
 void SocModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
   vertexCount = static_cast<uint32_t>(vertices.size());
   assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -22,11 +23,12 @@ void SocModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
   socDevice.createBuffer(
       bufferSize,
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,//该内存自动对GPU可见
       vertexBuffer,
       vertexBufferMemory);
 
   void *data;
+  //创建VertexBuffer成功之后，填充该内存
   vkMapMemory(socDevice.device(), vertexBufferMemory, 0, bufferSize, 0, &data);
   memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
   vkUnmapMemory(socDevice.device(), vertexBufferMemory);
@@ -41,7 +43,7 @@ void SocModel::bind(VkCommandBuffer commandBuffer) {
   VkDeviceSize offsets[] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 }
-
+//如何布局
 std::vector<VkVertexInputBindingDescription> SocModel::Vertex::getBindingDescriptions() {
   std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
   bindingDescriptions[0].binding = 0;
@@ -50,6 +52,7 @@ std::vector<VkVertexInputBindingDescription> SocModel::Vertex::getBindingDescrip
   return bindingDescriptions;
 }
 
+//如何解释
 std::vector<VkVertexInputAttributeDescription> SocModel::Vertex::getAttributeDescriptions() {
   std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
   attributeDescriptions[0].binding = 0;

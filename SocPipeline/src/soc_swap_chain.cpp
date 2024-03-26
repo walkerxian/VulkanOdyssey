@@ -11,11 +11,6 @@
 
 namespace soc {
 
-SocSwapChain::SocSwapChain(SocDevice &deviceRef, VkExtent2D extent)
-    : device{deviceRef}, windowExtent{extent} {
-  init();
-}
-
 SocSwapChain::SocSwapChain(
     SocDevice &deviceRef, VkExtent2D extent, std::shared_ptr<SocSwapChain> previous)
     : device{deviceRef}, windowExtent{extent}, oldSwapChain{previous} {
@@ -23,7 +18,12 @@ SocSwapChain::SocSwapChain(
   oldSwapChain = nullptr;
 }
 
-void SocSwapChain::init() {
+SocSwapChain::SocSwapChain(SocDevice &deviceRef, VkExtent2D extent)
+    : device{deviceRef}, windowExtent{extent} {
+  init();
+}
+
+void SocSwapChain::init() {  
   createSwapChain();
   createImageViews();
   createRenderPass();
@@ -143,10 +143,9 @@ VkResult SocSwapChain::submitCommandBuffers(const VkCommandBuffer *buffers, uint
 
 void SocSwapChain::createSwapChain() {
 
-  std::cout << "Start Create Swap Chain -----------------" <<std::endl;
+  //std::cout << "Start Create Swap Chain -----------------" <<std::endl;
 
   SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
-
   VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
   VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
   VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
@@ -227,6 +226,7 @@ void SocSwapChain::createImageViews() {
 }
 
 void SocSwapChain::createRenderPass() {
+
   VkAttachmentDescription depthAttachment{};
   depthAttachment.format = findDepthFormat();
   depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -255,6 +255,7 @@ void SocSwapChain::createRenderPass() {
   colorAttachmentRef.attachment = 0;
   colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+
   VkSubpassDescription subpass = {};
   subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
   subpass.colorAttachmentCount = 1;
@@ -271,6 +272,7 @@ void SocSwapChain::createRenderPass() {
   dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
   std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
+
   VkRenderPassCreateInfo renderPassInfo = {};
   renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -286,8 +288,11 @@ void SocSwapChain::createRenderPass() {
 }
 
 void SocSwapChain::createFramebuffers() {
+
   swapChainFramebuffers.resize(imageCount());
+  
   for (size_t i = 0; i < imageCount(); i++) {
+
     std::array<VkImageView, 2> attachments = {swapChainImageViews[i], depthImageViews[i]};
 
     VkExtent2D swapChainExtent = getSwapChainExtent();

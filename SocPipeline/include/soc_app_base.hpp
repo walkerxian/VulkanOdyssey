@@ -29,6 +29,7 @@ namespace soc{
         void loadModels();
 
         void createPipelineLayout();
+        
         void createPipeline();
         
         void createCommandBuffers();

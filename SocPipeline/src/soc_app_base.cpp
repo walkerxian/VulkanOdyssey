@@ -61,8 +61,6 @@ namespace soc{
         pushConstantRange.offset = 0;
         pushConstantRange.size = sizeof(SimplePushConstantData);
 
-
-
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 0;
@@ -74,7 +72,6 @@ namespace soc{
             VK_SUCCESS) {
             throw std::runtime_error("failed to create pipeline layout!");
         }
-
     }
 
     void SocAppBase::createPipeline(){
@@ -107,11 +104,10 @@ namespace soc{
         }
 
         //vkDeviceWaitIdle(socDevice.device);
-        vkDeviceWaitIdle(socDevice.device());
+        vkDeviceWaitIdle(socDevice.device());//重新创建交换链的时候，需要等待当前的交换链失效才能创建
 
         if(socSwapChain == nullptr){
-            
-            //std::cout<<"Start  "<<std::endl;
+                       
             //初始化的时候已经创建了命令缓冲区
             socSwapChain = std::make_unique<SocSwapChain>(socDevice,extent);
 
@@ -125,6 +121,8 @@ namespace soc{
                 createCommandBuffers();
             }
         }
+
+        //创建图形管线
         createPipeline();    
         // std::cout<<"Create a pipeline!"<<std::endl;
         //throw std::runtime_error("Create a Pipeline");
@@ -147,72 +145,75 @@ namespace soc{
         }        
     }
 
+    //负责记录命令到Vulkan命令缓冲区，这些命令将用于渲染imageIndex相关联的给定帧
     void SocAppBase::recordCommandBuffer(int imageIndex)
     {
         static int frame = 0;
         frame = (frame + 1) % 100;
+        
         VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-              if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
-                throw std::runtime_error("failed to begin recording command buffer!");
-            }
+        //准备工作，开始记录，如果准备工作失败，则抛出异常
+        if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) 
+        {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
 
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            //core 
-            renderPassInfo.renderPass = socSwapChain->getRenderPass();
-            renderPassInfo.framebuffer = socSwapChain->getFrameBuffer(imageIndex);
+        //
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        //core 
+        renderPassInfo.renderPass = socSwapChain->getRenderPass();
+        renderPassInfo.framebuffer = socSwapChain->getFrameBuffer(imageIndex);
 
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = socSwapChain->getSwapChainExtent();
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = socSwapChain->getSwapChainExtent();
 
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
-            clearValues[1].depthStencil = {1.0f, 0};
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
+        clearValues[1].depthStencil = {1.0f, 0};
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
 
-            vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            VkViewport viewport{};
-            viewport.x = 0.0f;
-            viewport.y = 0.0f;
-            viewport.width = static_cast<float>(socSwapChain->getSwapChainExtent().width);
-            viewport.height = static_cast<float>(socSwapChain->getSwapChainExtent().height);
-            viewport.minDepth = 0.0f;
-            viewport.maxDepth = 1.0f;
-            VkRect2D scissor{{0, 0}, socSwapChain->getSwapChainExtent()};
-            vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
-            vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(socSwapChain->getSwapChainExtent().width);
+        viewport.height = static_cast<float>(socSwapChain->getSwapChainExtent().height);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        VkRect2D scissor{{0, 0}, socSwapChain->getSwapChainExtent()};
+        vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+        vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-            socPipeline->bind(commandBuffers[imageIndex]);
-            //必须绑定
-            socModel->bind(commandBuffers[imageIndex]);
+        socPipeline->bind(commandBuffers[imageIndex]);       
+        socModel->bind(commandBuffers[imageIndex]);
 
-             for (int j = 0; j < 4; j++) {
-                SimplePushConstantData push{};
-                push.offset = {-0.5f + frame * 0.02f, -0.4f + j * 0.25f};
-                push.color = {0.0f, 0.0f, 0.2f + 0.2f * j};
+        //Push ConstantRange
+        for (int j = 0; j < 4; j++) {
+            SimplePushConstantData push{};
+            push.offset = {-0.5f + frame * 0.02f, -0.4f + j * 0.25f};
+            push.color = {0.0f, 0.0f, 0.2f + 0.2f * j};
 
-                vkCmdPushConstants(
-                    commandBuffers[imageIndex],
-                    pipelineLayout,
-                    VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                    0,
-                    sizeof(SimplePushConstantData),
-                    &push);
-                socModel->draw(commandBuffers[imageIndex]);
-            }
+            vkCmdPushConstants(
+                commandBuffers[imageIndex],
+                pipelineLayout,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                0,
+                sizeof(SimplePushConstantData),
+                &push);
+            socModel->draw(commandBuffers[imageIndex]);
+        }
 
-         
-
-            vkCmdDraw(commandBuffers[imageIndex],3,1,0,0);
-            vkCmdEndRenderPass(commandBuffers[imageIndex]);
-           
-            if(vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS){
-                throw std::runtime_error("failed to record command buffer!");    
-            }           
+        vkCmdDraw(commandBuffers[imageIndex],3,1,0,0);
+        vkCmdEndRenderPass(commandBuffers[imageIndex]);
+        
+        if(vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS){
+            throw std::runtime_error("failed to record command buffer!");    
+        }           
     }
 
     void SocAppBase::freeCommandBuffers(){
