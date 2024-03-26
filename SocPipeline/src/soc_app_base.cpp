@@ -3,6 +3,7 @@
 //std
 #include <array>
 #include <stdexcept>
+#include<iostream>
 
 namespace soc{
 
@@ -81,13 +82,38 @@ namespace soc{
         auto extent = socWindow.getExtent();
         while (extent.width == 0 || extent.height == 0)
         {
-            extent = socWindow.getExtent();
+            extent = socWindow.getExtent();//重新获取窗口大小
+            
             glfwWaitEvents();//当窗口最小化暂停？
         }
 
-        vkDeviceWaitIdle(socDevice.device);
-        socSwapChain = std::make_unique<SocSwapChain>(socDevice,extent);
+        //vkDeviceWaitIdle(socDevice.device);
+        vkDeviceWaitIdle(socDevice.device());
+
+        if(socSwapChain == nullptr){
+            
+            //std::cout<<"Start  "<<std::endl;
+            socSwapChain = std::make_unique<SocSwapChain>(socDevice,extent);
+
+        }
+        else{
+           
+          // std::cout <<"Update  " << std::endl;
+            socSwapChain = std::make_unique<SocSwapChain>(socDevice,extent,std::move(socSwapChain));
+            if(socSwapChain->imageCount() != commandBuffers.size())
+            {
+                freeCommandBuffers();
+                createCommandBuffers();
+            }
+
+        }
+   
+
         createPipeline();    
+
+        // std::cout<<"Create a pipeline!"<<std::endl;
+        //throw std::runtime_error("Create a Pipeline");
+
     }
 
     //只负责命令缓冲区的分配，不再记录命令缓冲区
@@ -104,12 +130,7 @@ namespace soc{
         if (vkAllocateCommandBuffers(socDevice.device(), &allocInfo, commandBuffers.data()) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
-        }
-
-        // for (int i = 0; i < commandBuffers.size(); i++)
-        // {
-            
-        // }        
+        }        
     }
 
     void SocAppBase::recordCommandBuffer(int imageIndex)
@@ -125,7 +146,7 @@ namespace soc{
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
             //core 
             renderPassInfo.renderPass = socSwapChain->getRenderPass();
-            renderPassInfo.framebuffer = socSwapChain->getFrameBuffer(i);
+            renderPassInfo.framebuffer = socSwapChain->getFrameBuffer(imageIndex);
 
             renderPassInfo.renderArea.offset = {0, 0};
             renderPassInfo.renderArea.extent = socSwapChain->getSwapChainExtent();
@@ -151,12 +172,21 @@ namespace soc{
             }           
     }
 
-   
+    void SocAppBase::freeCommandBuffers(){
+        vkFreeCommandBuffers(
+            socDevice.device(),
+            socDevice.getCommandPool(),
+            static_cast<uint32_t>(commandBuffers.size()),
+            commandBuffers.data());
+
+        commandBuffers.clear();
+    }
 
     void SocAppBase::drawFrame(){
 
         uint32_t imageIndex;
         auto result = socSwapChain->acquireNextImage(&imageIndex);
+        
         if(result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             recreateSwapChain();
@@ -169,16 +199,16 @@ namespace soc{
 
        //重新记录命令缓冲区，以至于缩放交换链之后重新绘制
         recordCommandBuffer(imageIndex);
+      
         result = socSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
-        if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-         socWindow.wasWindowResized())//当重新调整窗口之后，会触发该事件
+      
+        if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||socWindow.wasWindowResized())//当重新调整窗口之后，会触发该事件
         {
            socWindow.resetWindowResizedFlag();
            recreateSwapChain();
            return;
         }
-        
-        if (result != VK_SUCCESS) {
+        else if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }
     }

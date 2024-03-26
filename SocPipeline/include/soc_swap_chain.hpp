@@ -8,6 +8,7 @@
 // std lib headers
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace soc {
 
@@ -16,6 +17,9 @@ class SocSwapChain {
   static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
   SocSwapChain(SocDevice &deviceRef, VkExtent2D windowExtent);
+  SocSwapChain(
+      SocDevice &deviceRef, VkExtent2D windowExtent, std::shared_ptr<SocSwapChain> previous);
+
   ~SocSwapChain();
 
   SocSwapChain(const SocSwapChain &) = delete;
@@ -39,6 +43,7 @@ class SocSwapChain {
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
  private:
+  void init();
   void createSwapChain();
   void createImageViews();
   void createDepthResources();
@@ -69,12 +74,15 @@ class SocSwapChain {
   VkExtent2D windowExtent;
 
   VkSwapchainKHR swapChain;
+  std::shared_ptr<SocSwapChain> oldSwapChain;//add memory headfile
+
 
   std::vector<VkSemaphore> imageAvailableSemaphores;
   std::vector<VkSemaphore> renderFinishedSemaphores;
   std::vector<VkFence> inFlightFences;
   std::vector<VkFence> imagesInFlight;
   size_t currentFrame = 0;
+  
 };
 
 }  // namespace lve

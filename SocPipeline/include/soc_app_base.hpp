@@ -27,12 +27,17 @@ namespace soc{
 
         private:
         void loadModels();
+
         void createPipelineLayout();
         void createPipeline();
+        
         void createCommandBuffers();
+        void recordCommandBuffer(int imageIndex);
+        void freeCommandBuffers();
+
         void drawFrame();
         void recreateSwapChain();
-        void recordCommandBuffer(int imageIndex);
+       
 
         SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};        
         SocDevice socDevice{socWindow};
