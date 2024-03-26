@@ -75,6 +75,7 @@ namespace soc{
             pipelineConfig);
     }
 
+    //只负责命令缓冲区的分配，不再记录命令缓冲区
     void SocAppBase::createCommandBuffers(){
         
         commandBuffers.resize(socSwapChain->imageCount());
@@ -90,12 +91,18 @@ namespace soc{
             throw std::runtime_error("failed to allocate command buffers!");
         }
 
-        for (int i = 0; i < commandBuffers.size(); i++)
-        {
-            VkCommandBufferBeginInfo beginInfo{};
+        // for (int i = 0; i < commandBuffers.size(); i++)
+        // {
+            
+        // }        
+    }
+
+    void SocAppBase::recordCommandBuffer(int imageIndex)
+    {
+        VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-              if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+              if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
                 throw std::runtime_error("failed to begin recording command buffer!");
             }
 
@@ -114,20 +121,19 @@ namespace soc{
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
 
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            socPipeline->bind(commandBuffers[i]);
+            socPipeline->bind(commandBuffers[imageIndex]);
             //必须绑定
-            socModel->bind(commandBuffers[i]);
-            socModel->draw(commandBuffers[i]);
+            socModel->bind(commandBuffers[imageIndex]);
+            socModel->draw(commandBuffers[imageIndex]);
 
-            vkCmdDraw(commandBuffers[i],3,1,0,0);
-            vkCmdEndRenderPass(commandBuffers[i]);
+            vkCmdDraw(commandBuffers[imageIndex],3,1,0,0);
+            vkCmdEndRenderPass(commandBuffers[imageIndex]);
            
-            if(vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS){
+            if(vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS){
                 throw std::runtime_error("failed to record command buffer!");    
             }           
-        }        
     }
 
     void SocAppBase::drawFrame(){
