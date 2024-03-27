@@ -15,6 +15,7 @@ namespace soc{
         public:
         static constexpr int WIDTH = 800;
         static constexpr int HEIGHT = 600;
+        static constexpr float ROTATION_SPEED = 0.00008f;
 
         SocAppBase();
         ~SocAppBase();

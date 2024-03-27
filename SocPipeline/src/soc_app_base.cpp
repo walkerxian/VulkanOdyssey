@@ -51,6 +51,7 @@ namespace soc{
     }
 
     void SocAppBase::loadGameObjects() {
+
         std::vector<SocModel::Vertex> vertices{
             {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
             {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
@@ -65,7 +66,10 @@ namespace soc{
         triangle.transform2d.translation.x = .2f;
         triangle.transform2d.scale = {2.f, .5f};
         triangle.transform2d.rotation = .25f * glm::two_pi<float>();
+        //这里只压了一个三角形啊
         gameObjects.push_back(std::move(triangle));
+
+        std::cout<<"Size is " << gameObjects.size()<<std::endl;
     }
 
     void SocAppBase::createPipelineLayout(){
@@ -239,7 +243,7 @@ namespace soc{
         socPipeline->bind(commandBuffer);
         for (auto& obj : gameObjects)
         {
-            obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.01f,glm::two_pi<float>());
+            obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + ROTATION_SPEED,glm::two_pi<float>());
             SimplePushConstantData push{};
             push.offset = obj.transform2d.translation;
             push.color = obj.color;
@@ -249,30 +253,7 @@ namespace soc{
 
            obj.model->bind(commandBuffer);
            obj.model->draw(commandBuffer);
-        }
-          // vkCmdPushConstants(
-        //     commandBuffer,
-        //     pipelineLayout,
-        //     VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-        //     0,
-        //     sizeof(SimplePushConstantData),
-        //     &push);
-
-        // obj.model->bind(commandBuffer);
-        // obj.model->draw(commandBuffer);
-
-        // socPipeline->bind(commandBuffer);
-
-        // for (auto& obj : gameObjects) {
-
-        // obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.01f, glm::two_pi<float>());
-
-        // SimplePushConstantData push{};
-        // push.offset = obj.transform2d.translation;
-        // push.color = obj.color;
-        // push.transform = obj.transform2d.mat2();
-
-      
+        }          
     }
 
     void SocAppBase::freeCommandBuffers(){
