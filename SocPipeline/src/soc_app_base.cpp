@@ -65,6 +65,7 @@ namespace soc{
         triangle.color = {.1f, .8f, .1f};
         triangle.transform2d.translation.x = .2f;
         triangle.transform2d.scale = {2.f, .5f};
+        //triangle.transform2d.scale = {1.f, 1.f};
         triangle.transform2d.rotation = .25f * glm::two_pi<float>();
         //这里只压了一个三角形啊
         gameObjects.push_back(std::move(triangle));
@@ -246,7 +247,7 @@ namespace soc{
             obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + ROTATION_SPEED,glm::two_pi<float>());
             SimplePushConstantData push{};
             push.offset = obj.transform2d.translation;
-            push.color = obj.color;
+            push.color = obj.color;//当前Shader着色器并没有使用该push constant 
             push.transform = obj.transform2d.mat2();
 
            vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(SimplePushConstantData),&push);
