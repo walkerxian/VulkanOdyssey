@@ -34,6 +34,7 @@ namespace soc{
 
     void SocAppBase::run(){
 
+        //std::cout<<"maxPushConstantSize = " << socDevice.properties.limits.maxPushConstantsSize<<"\n";
         while (!socWindow.shouldClose())
         {
             /* code */
@@ -41,6 +42,8 @@ namespace soc{
 
             drawFrame();
         }
+
+       
 
         vkDeviceWaitIdle(socDevice.device());//why?
         

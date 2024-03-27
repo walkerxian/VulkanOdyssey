@@ -11,6 +11,7 @@ layout(push_constant) uniform Push {
 } push;
 
 void main(){  
+    //直接使用推送进来的数据
      gl_Position = vec4(position + push.offset,0.0,1.0);
      fragColor = push.color;
 }
