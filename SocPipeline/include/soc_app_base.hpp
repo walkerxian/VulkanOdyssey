@@ -1,10 +1,10 @@
 #pragma once
 
-#include "soc_window.hpp"
+#include "soc_device.hpp"
+#include "soc_game_object.hpp"
 #include "soc_pipeline.hpp"
 #include "soc_swap_chain.hpp"
-#include "soc_model.hpp"
-
+#include "soc_window.hpp"
 //std
 #include <memory>
 
@@ -26,7 +26,8 @@ namespace soc{
         void run();
 
         private:
-        void loadModels();
+        //void loadModels();
+        void loadGameObjects();
 
         void createPipelineLayout();
         
@@ -35,6 +36,8 @@ namespace soc{
         void createCommandBuffers();
         void recordCommandBuffer(int imageIndex);
         void freeCommandBuffers();
+
+        void renderGameObjects(VkCommandBuffer commandBuffer);
 
         void drawFrame();
         void recreateSwapChain();
@@ -49,7 +52,8 @@ namespace soc{
         VkPipelineLayout pipelineLayout;         
         std::vector<VkCommandBuffer> commandBuffers;
 
-        std::unique_ptr<SocModel> socModel;
+        //std::unique_ptr<SocModel> socModel;
+        std::vector<SocGameObject> gameObjects;
 
         // SocPipeline pipeline{
         //     socDevice,

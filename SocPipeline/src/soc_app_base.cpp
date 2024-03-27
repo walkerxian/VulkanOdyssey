@@ -4,6 +4,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 
 
@@ -15,12 +16,14 @@
 namespace soc{
 
     struct SimplePushConstantData {
+        glm::mat2 transform{1.f};//初始化单位阵
         glm::vec2 offset;
         alignas(16) glm::vec3 color;
     };
 
     SocAppBase::SocAppBase(){
-        loadModels();
+        //loadModels();
+        loadGameObjects();
         createPipelineLayout();
         //createPipeline();
         recreateSwapChain();
@@ -43,18 +46,26 @@ namespace soc{
             drawFrame();
         }
 
-       
-
         vkDeviceWaitIdle(socDevice.device());//why?
         
     }
 
-    void SocAppBase::loadModels() {
+    void SocAppBase::loadGameObjects() {
         std::vector<SocModel::Vertex> vertices{
             {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
             {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
             {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
-        socModel = std::make_unique<SocModel>(socDevice, vertices);
+
+        auto socModel = std::make_shared<SocModel>(socDevice, vertices);
+        auto triangle = SocGameObject::createGameObject();
+        
+        triangle.model = socModel;
+        
+        triangle.color = {.1f, .8f, .1f};
+        triangle.transform2d.translation.x = .2f;
+        triangle.transform2d.scale = {2.f, .5f};
+        triangle.transform2d.rotation = .25f * glm::two_pi<float>();
+        gameObjects.push_back(std::move(triangle));
     }
 
     void SocAppBase::createPipelineLayout(){
@@ -151,8 +162,8 @@ namespace soc{
     //负责记录命令到Vulkan命令缓冲区，这些命令将用于渲染imageIndex相关联的给定帧
     void SocAppBase::recordCommandBuffer(int imageIndex)
     {
-        static int frame = 0;
-        frame = (frame + 1) % 100;
+        // static int frame = 0;
+        // frame = (frame + 1) % 100;
         
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -192,31 +203,76 @@ namespace soc{
         vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
         vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-        socPipeline->bind(commandBuffers[imageIndex]);       
-        socModel->bind(commandBuffers[imageIndex]);
+        renderGameObjects(commandBuffers[imageIndex]);
 
-        //Push ConstantRange
-        for (int j = 0; j < 4; j++) {
-            SimplePushConstantData push{};
-            push.offset = {-0.5f + frame * 0.02f, -0.4f + j * 0.25f};
-            push.color = {0.0f, 0.0f, 0.2f + 0.2f * j};
 
-            vkCmdPushConstants(
-                commandBuffers[imageIndex],
-                pipelineLayout,
-                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                0,
-                sizeof(SimplePushConstantData),
-                &push);
-            socModel->draw(commandBuffers[imageIndex]);
-        }
 
-        vkCmdDraw(commandBuffers[imageIndex],3,1,0,0);
+        // socPipeline->bind(commandBuffers[imageIndex]);       
+        // socModel->bind(commandBuffers[imageIndex]);
+
+        // //Push ConstantRange
+        // for (int j = 0; j < 4; j++) {
+        //     SimplePushConstantData push{};
+        //     push.offset = {-0.5f + frame * 0.02f, -0.4f + j * 0.25f};
+        //     push.color = {0.0f, 0.0f, 0.2f + 0.2f * j};
+
+        //     vkCmdPushConstants(
+        //         commandBuffers[imageIndex],
+        //         pipelineLayout,
+        //         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+        //         0,
+        //         sizeof(SimplePushConstantData),
+        //         &push);
+        //     socModel->draw(commandBuffers[imageIndex]);
+        // }
+
+        // vkCmdDraw(commandBuffers[imageIndex],3,1,0,0);
         vkCmdEndRenderPass(commandBuffers[imageIndex]);
         
         if(vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS){
             throw std::runtime_error("failed to record command buffer!");    
         }           
+    }
+
+    void SocAppBase::renderGameObjects(VkCommandBuffer commandBuffer)
+    {
+        socPipeline->bind(commandBuffer);
+        for (auto& obj : gameObjects)
+        {
+            obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.01f,glm::two_pi<float>());
+            SimplePushConstantData push{};
+            push.offset = obj.transform2d.translation;
+            push.color = obj.color;
+            push.transform = obj.transform2d.mat2();
+
+           vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(SimplePushConstantData),&push);
+
+           obj.model->bind(commandBuffer);
+           obj.model->draw(commandBuffer);
+        }
+          // vkCmdPushConstants(
+        //     commandBuffer,
+        //     pipelineLayout,
+        //     VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+        //     0,
+        //     sizeof(SimplePushConstantData),
+        //     &push);
+
+        // obj.model->bind(commandBuffer);
+        // obj.model->draw(commandBuffer);
+
+        // socPipeline->bind(commandBuffer);
+
+        // for (auto& obj : gameObjects) {
+
+        // obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.01f, glm::two_pi<float>());
+
+        // SimplePushConstantData push{};
+        // push.offset = obj.transform2d.translation;
+        // push.color = obj.color;
+        // push.transform = obj.transform2d.mat2();
+
+      
     }
 
     void SocAppBase::freeCommandBuffers(){

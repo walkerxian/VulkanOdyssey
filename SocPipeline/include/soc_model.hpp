@@ -33,7 +33,8 @@ class SocModel {
  private:
   void createVertexBuffers(const std::vector<Vertex> &vertices);
 
-  SocDevice &socDevice;
+  SocDevice& socDevice;
+  
   VkBuffer vertexBuffer;
   VkDeviceMemory vertexBufferMemory;
   uint32_t vertexCount;

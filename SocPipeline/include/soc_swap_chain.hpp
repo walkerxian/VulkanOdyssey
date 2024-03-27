@@ -77,10 +77,13 @@ class SocSwapChain {
   std::shared_ptr<SocSwapChain> oldSwapChain;//add memory headfile
 
 
+  //针对GPU队列之间的同步
   std::vector<VkSemaphore> imageAvailableSemaphores;
   std::vector<VkSemaphore> renderFinishedSemaphores;
+  //针对应用程序CPU侧的同步
   std::vector<VkFence> inFlightFences;
   std::vector<VkFence> imagesInFlight;
+
   size_t currentFrame = 0;
   
 };
