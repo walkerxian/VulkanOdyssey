@@ -15,7 +15,7 @@ void main(){
     //直接使用推送进来的数据
      gl_Position = vec4(push.transform*position + push.offset,0.0,1.0);
      //fragColor = push.color;
-     fragColor = color;
+    fragColor = color;
 }
 
 
