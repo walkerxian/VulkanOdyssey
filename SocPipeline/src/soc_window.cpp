@@ -11,12 +11,15 @@ namespace soc
     {
         initWindow();
     }
+    
 
     SocWindow::~SocWindow(){
+
         glfwDestroyWindow(window);
         glfwTerminate();
     }
 
+    //初始化窗口系统
     void SocWindow::initWindow(){
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API,GLFW_NO_API);
@@ -27,7 +30,9 @@ namespace soc
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
-
+    /// @brief 创建WindowSurface
+    /// @param instance Vulkan Instance
+    /// @param surface   
     void SocWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {
     
         if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {       
@@ -35,6 +40,8 @@ namespace soc
         }
     }
 
+    //调整FrameBuffer Size大小： FrameBuffer是包含一系列ImageView 
+    //具体包含FrameBuffer是由 RenderPass来指定的，比如ColorAttachement,DepthAttachment等
     void SocWindow::framebufferResizeCallback(GLFWwindow * window,int width,int height)
     {
         auto  socWindow = reinterpret_cast<SocWindow *>(glfwGetWindowUserPointer(window));

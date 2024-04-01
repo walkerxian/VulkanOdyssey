@@ -27,6 +27,7 @@ namespace soc{
       vkDestroyPipeline(socDevice.device(),graphicsPipeline,nullptr);
     }
 
+//创建管线
 void SocPipeline::createGraphicsPipeline(  
     const std::string& vertFilepath, 
     const std::string& fragFilepath,
@@ -128,13 +129,14 @@ void SocPipeline::createShaderModule(const std::vector<char>& code,VkShaderModul
     createInfo.codeSize = code.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
+    //创建ShaderModule
     if (vkCreateShaderModule(socDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
       throw std::runtime_error("failed to create shader module");
     }
 }
 
 //void SocPipeline::Bin
-
+//设置图形管线中默认配置（通常是指固定管线，Runtime不能更改的）
 void SocPipeline::defaultPipelineConfigInfo(
   PipelineConfigInfo& configInfo) {
   
@@ -233,6 +235,7 @@ void SocPipeline::bind(VkCommandBuffer commandBuffer){
 
 }
 
+//读取SPV文件
 std::vector<char> SocPipeline::readFile(const std::string& filename) {
   std::ifstream file{filename, std::ios::ate | std::ios::binary};
 

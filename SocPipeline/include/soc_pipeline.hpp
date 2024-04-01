@@ -3,6 +3,7 @@
 #include "soc_device.hpp"
 
 #include <string>
+#include <memory>
 #include <vector>
 
 namespace soc{
@@ -27,8 +28,6 @@ namespace soc{
         
         std::vector<VkDynamicState> dynamicStateEnables;
         VkPipelineDynamicStateCreateInfo dynamicStateInfo;
-
-
 
         VkPipelineLayout pipelineLayout = nullptr;
         VkRenderPass renderPass = nullptr;
@@ -65,9 +64,11 @@ namespace soc{
 
         void createShaderModule(const std::vector<char>& code,VkShaderModule* shaderModule);
 
-        SocDevice& socDevice;
+        SocDevice& socDevice;//Logic Device 和Physical Device
+        
         VkPipeline graphicsPipeline;
-        VkShaderModule vertShaderModule;
+        //单独把可编程模块给提出来了
+        VkShaderModule  vertShaderModule;
         VkShaderModule fragShaderModule;
     };
     

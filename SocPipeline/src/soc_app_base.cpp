@@ -15,11 +15,13 @@
 
 namespace soc{
 
+
     struct SimplePushConstantData {
         glm::mat2 transform{1.f};//初始化单位阵
         glm::vec2 offset;
         alignas(16) glm::vec3 color;
     };
+
 
     SocAppBase::SocAppBase(){
         //loadModels();
@@ -50,6 +52,7 @@ namespace soc{
         
     }
 
+    //自定义模型数据和矩阵数据（平移，旋转，缩放）
     void SocAppBase::loadGameObjects() {
 
         std::vector<SocModel::Vertex> vertices{
@@ -73,13 +76,16 @@ namespace soc{
         std::cout<<"Size is " << gameObjects.size()<<std::endl;
     }
 
+    //创建管线Layout数据
     void SocAppBase::createPipelineLayout(){
-              
+        
+        //1 Push Constant Range数据
         VkPushConstantRange pushConstantRange{};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
         pushConstantRange.size = sizeof(SimplePushConstantData);
 
+        //2 PipelineLayout数据
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 0;
@@ -99,12 +105,13 @@ namespace soc{
         assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
         PipelineConfigInfo pipelineConfig{};
-        //获取默认的管线配置
+        //1 设置Default Pipeline ConfigInfo
         SocPipeline::defaultPipelineConfigInfo(pipelineConfig);
-        
+        //2 设置RenderPass
         pipelineConfig.renderPass = socSwapChain->getRenderPass();
-        pipelineConfig.pipelineLayout = pipelineLayout;
-        //需要准备3份数据
+        //3 设置PipeineLayout
+        pipelineConfig.pipelineLayout = pipelineLayout;      
+
         socPipeline = std::make_unique<SocPipeline>(
             socDevice,
             "shaders/simple_shader.vert.spv",
@@ -242,17 +249,21 @@ namespace soc{
     void SocAppBase::renderGameObjects(VkCommandBuffer commandBuffer)
     {
         socPipeline->bind(commandBuffer);
+
         for (auto& obj : gameObjects)
         {
+            //先计算旋转
             obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + ROTATION_SPEED,glm::two_pi<float>());
             SimplePushConstantData push{};
             push.offset = obj.transform2d.translation;
             push.color = obj.color;//当前Shader着色器并没有使用该push constant 
             push.transform = obj.transform2d.mat2();
 
+            //通过常量推送进行更新矩阵
            vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(SimplePushConstantData),&push);
 
            obj.model->bind(commandBuffer);
+
            obj.model->draw(commandBuffer);
         }          
     }

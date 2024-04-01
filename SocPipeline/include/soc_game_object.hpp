@@ -19,6 +19,7 @@ struct Transform2dComponent {
     glm::mat2 rotMatrix{{c, s}, {-s, c}};
     //缩放矩阵
     glm::mat2 scaleMat{{scale.x, .0f}, {.0f, scale.y}};
+
     return rotMatrix * scaleMat;
   }
 };
@@ -39,8 +40,11 @@ class SocGameObject {
 
   id_t getId() { return id; }
 
+  
   std::shared_ptr<SocModel> model{};
+
   glm::vec3 color{};
+  //变换矩阵相关
   Transform2dComponent transform2d{};
 
  private:

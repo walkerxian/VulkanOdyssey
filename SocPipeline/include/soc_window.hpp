@@ -15,13 +15,16 @@ namespace soc{
         SocWindow(const SocWindow &) = delete;
         SocWindow& operation(const SocWindow &) = delete;
         
+        //是否需要关闭窗口系统
         bool shouldClose(){return glfwWindowShouldClose(window);}        
 
         VkExtent2D getExtent(){return {static_cast<uint32_t>(width),static_cast<uint32_t>(height)};}
 
+        //是否需要重新调整窗口大小-》重新调整交换链的大小
         bool wasWindowResized(){return framebufferResized;}
         void resetWindowResizedFlag(){framebufferResized = false;}
 
+        //创建WindowSurface
         void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
         
     private:

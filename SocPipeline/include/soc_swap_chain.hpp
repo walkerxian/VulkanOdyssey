@@ -74,6 +74,7 @@ class SocSwapChain {
   VkExtent2D windowExtent;
 
   VkSwapchainKHR swapChain;
+  //使用 std::shared_ptr 管理交换链和其图像可以简化资源的重新创建和释放逻辑。
   std::shared_ptr<SocSwapChain> oldSwapChain;//add memory headfile
 
 
