@@ -5,6 +5,7 @@
 #include <array>
 #include <cassert>
 #include <stdexcept>
+//#include <iostream>
 
 namespace soc
 {
@@ -19,6 +20,31 @@ namespace soc
 
 
     void SocRenderer::recreateSwapChain(){
+
+        auto extent = socWindow.getExtent();
+        //最小化
+        while (extent.width == 0 || extent.height == 0) {
+            extent = socWindow.getExtent();
+            glfwWaitEvents();
+        }
+        vkDeviceWaitIdle(socDevice.device());
+
+        if (socSwapChain == nullptr) {
+            
+            //第一次创建交换链
+            socSwapChain = std::make_unique<SocSwapChain>(socDevice, extent);
+
+        } else {
+            
+            //更新交换链
+            std::shared_ptr<SocSwapChain> oldSwapChain = std::move(socSwapChain);
+            socSwapChain = std::make_unique<SocSwapChain>(socDevice, extent, oldSwapChain);
+
+            //需要查看里面的数据是否发生了改变
+            if (!oldSwapChain->compareSwapFormats(*socSwapChain.get())) {
+            throw std::runtime_error("Swap chain image(or depth) format has changed!");
+            }
+        }
 
     }
   
@@ -43,9 +69,46 @@ namespace soc
 
     VkCommandBuffer SocRenderer::beginFrame(){
 
+
+    //     uint32_t imageIndex;
+    //     auto result = socSwapChain->acquireNextImage(&imageIndex);
+        
+    //     if(result == VK_ERROR_OUT_OF_DATE_KHR)
+    //     {
+    //         recreateSwapChain();
+    //         return;
+    //     }
+
+    //     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+    //         throw std::runtime_error("failed to acquire swap chain image!");
+    //     }
+
+    //    //重新记录命令缓冲区，以至于缩放交换链之后重新绘制
+    //     recordCommandBuffer(imageIndex);
+      
+    //     result = socSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+      
+    //     if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||socWindow.wasWindowResized())//当重新调整窗口之后，会触发该事件
+    //     {
+    //        socWindow.resetWindowResizedFlag();
+
+    //        //重建交换链只重建命令缓冲区，并不记录重新记录命令缓冲区；记
+    //        //命令缓冲区的记录直接走正常的记录流程
+
+    //        recreateSwapChain();
+
+    //        return;
+    //     }
+    //     else if (result != VK_SUCCESS) {
+    //         throw std::runtime_error("failed to present swap chain image!");
+    //     }
+
+
+
         assert(!isFrameStarted && "Can't call beginFrame while already in progress");
         //需要从SwapChain里面 Get vkAcquireNextImageKHR
-        auto result = lveSwapChain->acquireNextImage(&currentImageIndex);
+        //这里是将ImageIndex保存在这个currentImageIndex里面
+        auto result = socSwapChain->acquireNextImage(&currentImageIndex);
         if(result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             recreateSwapChain();
@@ -72,6 +135,7 @@ namespace soc
             throw std::runtime_error("failed to begin recording command buffer!");
         }
 
+        
         return commandBuffer;
     }
 
@@ -86,10 +150,9 @@ namespace soc
         //为什么不是重建交换链之后再提交？
 
         //记录完成之后，开始提交
-       auto result = lveSwapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
+       auto result = socSwapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
         //更新过交换链之后
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-        socWindow.wasWindowResized()) {
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||socWindow.wasWindowResized()) {
             
             socWindow.resetWindowResizedFlag();
             recreateSwapChain();
@@ -122,15 +185,19 @@ namespace soc
 
     //精确描述了一系列渲染操作的集合，以及这些操作如何与帧缓冲区中的各种附件Attachment交互；
     void SocRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer){
+       
+     
         //断言是不满足条件则执行
         assert(isFrameStarted && "Can't call beginSwapChainRenderPass if frame is not in progress");
         assert(commandBuffer == getCurrentCommandBuffer() &&"Can't begin render pass on command buffer from a different frame");
 
         VkRenderPassBeginInfo renderPassInfo;
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.pNext = nullptr;
+        //核心配置 renderPass和 framebuffer
         renderPassInfo.renderPass = socSwapChain->getRenderPass();
         //为renderPass指定具体的资源
-        renderPassInfo.framebuffer = socSwapChain->getFrameBuffer(currentFrameIndex);
+        renderPassInfo.framebuffer = socSwapChain->getFrameBuffer(currentImageIndex);
 
         renderPassInfo.renderArea.offset = {0,0};
         renderPassInfo.renderArea.extent = socSwapChain->getSwapChainExtent();
@@ -164,8 +231,8 @@ namespace soc
     void SocRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer){            
         assert(isFrameStarted && "Can't call endSwapChainRenderPass if frame is not in progress");
         assert(commandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame");        
-        vkCmdEndRenderPass(commandBuffers);
+        vkCmdEndRenderPass(commandBuffer);
     }
     
-    
+
 }

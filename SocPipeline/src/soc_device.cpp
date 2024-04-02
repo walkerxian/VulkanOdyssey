@@ -526,7 +526,7 @@ void SocDevice::copyBufferToImage(
       commandBuffer,
       buffer,
       image,
-      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,//Images to be used as destination for a memory copy operation
       1,
       &region);
   endSingleTimeCommands(commandBuffer);

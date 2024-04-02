@@ -24,7 +24,7 @@ public:
 
 
   //1 RenderPass: 告知最终输出的Image(或者ImageView, Attachments)
-  VkRenderPass getSwapChainRenderPass() const { return lveSwapChain->getRenderPass(); }
+  VkRenderPass getSwapChainRenderPass() const { return socSwapChain->getRenderPass(); }
 
   bool isFrameInProgress() const { return isFrameStarted; }
 

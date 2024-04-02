@@ -1,5 +1,7 @@
 #include "soc_app_base.hpp"
 
+#include "soc_render_system.hpp"
+
 // libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -11,33 +13,35 @@
 //std
 #include <array>
 #include <stdexcept>
-#include<iostream>
+#include <cassert>
 
 namespace soc{
 
 
-    struct SimplePushConstantData {
-        glm::mat2 transform{1.f};//初始化单位阵
-        glm::vec2 offset;
-        alignas(16) glm::vec3 color;
-    };
+    // struct SimplePushConstantData {
+    //     glm::mat2 transform{1.f};//初始化单位阵
+    //     glm::vec2 offset;
+    //     alignas(16) glm::vec3 color;
+    // };
 
 
     SocAppBase::SocAppBase(){
         //loadModels();
         loadGameObjects();
-        createPipelineLayout();
-        //createPipeline();
-        recreateSwapChain();
-        createCommandBuffers();
+        // createPipelineLayout();
+        // //createPipeline();
+        // recreateSwapChain();
+        // createCommandBuffers();
     }
 
     SocAppBase::~SocAppBase(){
 
-        vkDestroyPipelineLayout(socDevice.device(),pipelineLayout,nullptr);
+       // vkDestroyPipelineLayout(socDevice.device(),pipelineLayout,nullptr);
     }
 
     void SocAppBase::run(){
+
+        SocRenderSystem socRenderSystem{socDevice,socRenderer.getSwapChainRenderPass()};
 
         //std::cout<<"maxPushConstantSize = " << socDevice.properties.limits.maxPushConstantsSize<<"\n";
         while (!socWindow.shouldClose())
@@ -45,7 +49,17 @@ namespace soc{
             /* code */
             glfwPollEvents();
 
-            drawFrame();
+           // drawFrame();
+           if (auto commandBuffer = socRenderer.beginFrame()) {
+      
+            socRenderer.beginSwapChainRenderPass(commandBuffer);
+
+            socRenderSystem.renderGameObjects(commandBuffer, gameObjects);
+
+            socRenderer.endSwapChainRenderPass(commandBuffer);
+
+            socRenderer.endFrame();
+            }
         }
 
         vkDeviceWaitIdle(socDevice.device());//why?
@@ -73,9 +87,9 @@ namespace soc{
         //这里只压了一个三角形啊
         gameObjects.push_back(std::move(triangle));
 
-        std::cout<<"Size is " << gameObjects.size()<<std::endl;
+        //std::cout<<"Size is " << gameObjects.size()<<std::endl;
     }
-
+/*
     //创建管线Layout数据
     void SocAppBase::createPipelineLayout(){
         
@@ -279,7 +293,6 @@ namespace soc{
     }
 
     void SocAppBase::drawFrame(){
-
         uint32_t imageIndex;
         auto result = socSwapChain->acquireNextImage(&imageIndex);
         
@@ -313,4 +326,7 @@ namespace soc{
             throw std::runtime_error("failed to present swap chain image!");
         }
     }
+
+*/
+
 }
