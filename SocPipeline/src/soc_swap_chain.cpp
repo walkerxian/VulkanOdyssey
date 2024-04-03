@@ -51,6 +51,9 @@ SocSwapChain::~SocSwapChain() {
   swapChainImageViews.clear();
 
   if (swapChain != nullptr) {
+
+    //1：在销毁交换链之前，需要保证不会有待处理的工作
+    //2：最好在销毁任何信号之前销毁可能使用这些信号的交换链
     vkDestroySwapchainKHR(device.device(), swapChain, nullptr);
     swapChain = nullptr;
   }
@@ -76,6 +79,7 @@ SocSwapChain::~SocSwapChain() {
 }
 
 VkResult SocSwapChain::acquireNextImage(uint32_t *imageIndex) {
+  
   vkWaitForFences(
       device.device(),
       1,
@@ -83,6 +87,7 @@ VkResult SocSwapChain::acquireNextImage(uint32_t *imageIndex) {
       VK_TRUE,
       std::numeric_limits<uint64_t>::max());
 
+  //获取下一幅可用的图像
   VkResult result = vkAcquireNextImageKHR(
       device.device(),
       swapChain,
@@ -134,7 +139,7 @@ VkResult SocSwapChain::submitCommandBuffers(const VkCommandBuffer *buffers, uint
 
   presentInfo.pImageIndices = imageIndex;
 
-  //将结果呈现给屏幕
+  //将结果呈现给屏幕;布局设置好之后，将结果呈现
   auto result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
 
   currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -172,10 +177,13 @@ void SocSwapChain::createSwapChain() {
   uint32_t queueFamilyIndices[] = {indices.graphicsFamily, indices.presentFamily};
 
   if (indices.graphicsFamily != indices.presentFamily) {
+    //sharingMode指定了图像在队列之间是如何共享的
     createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
     createInfo.queueFamilyIndexCount = 2;
     createInfo.pQueueFamilyIndices = queueFamilyIndices;
+
   } else {
+
     createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.queueFamilyIndexCount = 0;      // Optional
     createInfo.pQueueFamilyIndices = nullptr;  // Optional
@@ -183,7 +191,7 @@ void SocSwapChain::createSwapChain() {
 
   createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
   createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-
+  //控制了与窗口系统的同步
   createInfo.presentMode = presentMode;
   createInfo.clipped = VK_TRUE;
   
@@ -197,6 +205,8 @@ void SocSwapChain::createSwapChain() {
   // allowed to create a swap chain with more. That's why we'll first query the final number of
   // images with vkGetSwapchainImagesKHR, then resize the container and finally call it again to
   // retrieve the handles.
+
+  //需要将交换链的图像读取出来
   vkGetSwapchainImagesKHR(device.device(), swapChain, &imageCount, nullptr);
   swapChainImages.resize(imageCount);
   vkGetSwapchainImagesKHR(device.device(), swapChain, &imageCount, swapChainImages.data());
@@ -253,6 +263,7 @@ void SocSwapChain::createRenderPass() {
   colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
   colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   //确保所有图像在渲染结束后正确地处于VK_IMAGE_LAYOUT_PRESENT_SRC_KHR布局
+  //在呈现之前，确保图像的布局方式如下
   colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;//Images to be presented in the swap chain
 
   VkAttachmentReference colorAttachmentRef = {};
