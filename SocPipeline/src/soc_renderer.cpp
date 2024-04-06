@@ -27,6 +27,7 @@ namespace soc
             extent = socWindow.getExtent();
             glfwWaitEvents();
         }
+        //等待传入的socDevice完成所有之前提交的命令和操作
         vkDeviceWaitIdle(socDevice.device());
 
         if (socSwapChain == nullptr) {
@@ -40,12 +41,11 @@ namespace soc
             std::shared_ptr<SocSwapChain> oldSwapChain = std::move(socSwapChain);
             socSwapChain = std::make_unique<SocSwapChain>(socDevice, extent, oldSwapChain);
 
-            //需要查看里面的数据是否发生了改变
+            //需要查看里面的数据是否发生了改变:新的和旧的交换链是否有不同的数据格式                        
             if (!oldSwapChain->compareSwapFormats(*socSwapChain.get())) {
-            throw std::runtime_error("Swap chain image(or depth) format has changed!");
+                throw std::runtime_error("Swap chain image(or depth) format has changed!");
             }
         }
-
     }
   
      //vkBeginCommandBuffer为命令的记录做好了准备，开发者接下来就可以向命令缓冲区中记录绘制命令，

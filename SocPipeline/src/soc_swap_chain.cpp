@@ -23,16 +23,20 @@ SocSwapChain::SocSwapChain(SocDevice &deviceRef, VkExtent2D extent)
   init();
 }
 
-void SocSwapChain::init() {  
+void SocSwapChain::init() {
+
   createSwapChain();
+  
   createImageViews();
+  
   createRenderPass();
+  
   createDepthResources();
+  
   createFramebuffers();
+  
   createSyncObjects();
 }
-
-
 
 // SocSwapChain::SocSwapChain(SocDevice &deviceRef, VkExtent2D extent)
 //     : device{deviceRef}, windowExtent{extent} {
@@ -150,12 +154,12 @@ VkResult SocSwapChain::submitCommandBuffers(const VkCommandBuffer *buffers, uint
 void SocSwapChain::createSwapChain() {
 
   //std::cout << "Start Create Swap Chain -----------------" <<std::endl;
-
+  //是否适合创建交换链，考虑与目标对象Surface的兼容性
   SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
   VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
   VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
   VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
+  //需要手动指定渲染数量
   uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
   if (swapChainSupport.capabilities.maxImageCount > 0 &&
       imageCount > swapChainSupport.capabilities.maxImageCount) {
@@ -172,7 +176,7 @@ void SocSwapChain::createSwapChain() {
   createInfo.imageExtent = extent;
   createInfo.imageArrayLayers = 1;
   createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
+  //指定GPU渲染队列
   QueueFamilyIndices indices = device.findPhysicalQueueFamilies();
   uint32_t queueFamilyIndices[] = {indices.graphicsFamily, indices.presentFamily};
 
@@ -194,7 +198,7 @@ void SocSwapChain::createSwapChain() {
   //控制了与窗口系统的同步
   createInfo.presentMode = presentMode;
   createInfo.clipped = VK_TRUE;
-  
+  //窗口调整
   createInfo.oldSwapchain = oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
   if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
