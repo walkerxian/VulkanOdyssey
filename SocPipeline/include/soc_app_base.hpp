@@ -51,9 +51,13 @@ namespace soc{
         //CommandBuffer命令缓冲区，需要绘制的物体SocGameObject
         
         void loadGameObjects();
+        //屏幕窗口模块
         SocWindow socWindow{WIDTH,HEIGHT,"Hello Vulkan!"};        
+        //操作GPU硬件
         SocDevice socDevice{socWindow};
+        //渲染器
         SocRenderer socRenderer{socWindow,socDevice};
+        //需要的美术资产
         std::vector<SocGameObject> gameObjects;
 
 
