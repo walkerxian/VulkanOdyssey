@@ -322,6 +322,7 @@ void SocDevice::hasGflwRequiredInstanceExtensions() {
 }
 
 bool SocDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+  
   uint32_t extensionCount;
   vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -351,17 +352,20 @@ QueueFamilyIndices SocDevice::findQueueFamilies(VkPhysicalDevice device) {
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
   int i = 0;
+
   for (const auto &queueFamily : queueFamilies) {
     if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
       indices.graphicsFamily = i;
       indices.graphicsFamilyHasValue = true;
     }
+
     VkBool32 presentSupport = false;
     vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface_, &presentSupport);
     if (queueFamily.queueCount > 0 && presentSupport) {
       indices.presentFamily = i;
       indices.presentFamilyHasValue = true;
     }
+
     if (indices.isComplete()) {
       break;
     }
@@ -372,8 +376,13 @@ QueueFamilyIndices SocDevice::findQueueFamilies(VkPhysicalDevice device) {
   return indices;
 }
 
+/// @brief 也就是3个关注点：SwapChain本身的Capabilities,Surface Formats,Surface PresentModes
+/// @param device 
+/// @return 
 SwapChainSupportDetails SocDevice::querySwapChainSupport(VkPhysicalDevice device) {
+
   SwapChainSupportDetails details;
+
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface_, &details.capabilities);
 
   uint32_t formatCount;

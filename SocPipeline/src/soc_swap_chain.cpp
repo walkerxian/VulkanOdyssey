@@ -169,13 +169,13 @@ void SocSwapChain::createSwapChain() {
   VkSwapchainCreateInfoKHR createInfo = {};
   createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
   createInfo.surface = device.surface();
-
+  //指定交换链中图像image数量
   createInfo.minImageCount = imageCount;
   createInfo.imageFormat = surfaceFormat.format;
   createInfo.imageColorSpace = surfaceFormat.colorSpace;
   createInfo.imageExtent = extent;
   createInfo.imageArrayLayers = 1;
-  createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;//指定image的用途
   //指定GPU渲染队列
   QueueFamilyIndices indices = device.findPhysicalQueueFamilies();
   uint32_t queueFamilyIndices[] = {indices.graphicsFamily, indices.presentFamily};
@@ -222,16 +222,27 @@ void SocSwapChain::createSwapChain() {
 void SocSwapChain::createImageViews() {
   swapChainImageViews.resize(swapChainImages.size());
   for (size_t i = 0; i < swapChainImages.size(); i++) {
+
     VkImageViewCreateInfo viewInfo{};
+
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = swapChainImages[i];
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = swapChainImageFormat;
+    //你是在告诉Vulkan，对于图像的某个特定通道，比如说红色通道，
+    //你希望它就保持为红色通道的数据，不需要进行任何映射或改变
+    viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
+
+   
 
     if (vkCreateImageView(device.device(), &viewInfo, nullptr, &swapChainImageViews[i]) !=
         VK_SUCCESS) {
@@ -321,11 +332,14 @@ void SocSwapChain::createFramebuffers() {
     std::array<VkImageView, 2> attachments = {swapChainImageViews[i], depthImageViews[i]};
 
     VkExtent2D swapChainExtent = getSwapChainExtent();
+
     VkFramebufferCreateInfo framebufferInfo = {};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferInfo.renderPass = renderPass;
     framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    framebufferInfo.pAttachments = attachments.data();
+
+    framebufferInfo.pAttachments = attachments.data();//framebuffer引用实际的VkImageView资源，RenderPass是不会有实际资源的
+
     framebufferInfo.width = swapChainExtent.width;
     framebufferInfo.height = swapChainExtent.height;
     framebufferInfo.layers = 1;

@@ -11,7 +11,9 @@ namespace soc {
 struct SwapChainSupportDetails {
 
   VkSurfaceCapabilitiesKHR capabilities;
+
   std::vector<VkSurfaceFormatKHR> formats;
+  
   std::vector<VkPresentModeKHR> presentModes;
 
 };
@@ -48,6 +50,7 @@ class SocDevice {
 
   VkCommandPool getCommandPool() { return commandPool; }
   VkDevice device() { return device_; }
+
   VkSurfaceKHR surface() { return surface_; }
 
   VkQueue graphicsQueue() { return graphicsQueue_; }
